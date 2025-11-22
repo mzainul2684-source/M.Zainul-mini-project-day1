@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    Metadata dasar dokumen HTML:
+    - charset UTF-8 untuk dukung karakter internasional
+    - title tampil di tab browser
+    - viewport untuk responsif di mobile
+    - link ke file CSS utama (style.css)
+  -->
+  <meta charset="UTF-8" />
+  <title>Shop API Dashboard - Zainul</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<!-- 
+  body diberi class "dark-mode" sebagai default.
+  Class ini di-switch oleh JavaScript (theme toggle) untuk mode dark/light.
+-->
+<body class="dark-mode">
+  <!-- 
+    Layout utama aplikasi:
+    - Menggunakan grid: sidebar di kiri, main content di kanan.
+    - Semua konten UI berada di dalam <div class="layout"> ini.
+  -->
+  <div class="layout">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <!-- 
+      Sidebar berfungsi sebagai panel navigasi dan identitas developer.
+      Berisi:
+      - Avatar + nama + informasi kampus
+      - Navigasi tab (Auth, Users, Products)
+      - Status API
+      - Tombol untuk toggle dark/light mode
+    -->
+    <aside class="sidebar">
+      <!-- 
+        Header sidebar:
+        - Menampilkan avatar huruf "Z"
+        - Identitas: nama lengkap, universitas, prodi
+      -->
+      <div class="sidebar-header">
+        <!-- Avatar lingkaran dengan huruf Z (branding personal) -->
+        <div class="avatar-circle">Z</div>
+        <div class="sidebar-identity">
+          <div class="sidebar-name">M. Zainul Karohman</div>
+          <div class="sidebar-sub">Telkom University Surabaya</div>
+          <div class="sidebar-sub">Teknologi Informasi</div>
+        </div>
+      </div>
+
+      <!-- 
+        Navigasi tab di sidebar:
+        - Tombol-tombol ini tidak melakukan navigasi halaman,
+          tapi hanya menampilkan/menyembunyikan bagian tertentu (tab-content) di main area.
+        - data-tab merujuk ke id <div> konten (authTab, usersTab, productsTab).
+        - Class "tab active" menandai tab yang sedang aktif.
+      -->
+      <nav class="sidebar-nav">
+        <button class="tab active" data-tab="authTab">
+          <span class="tab-icon">🔐</span> Auth
+        </button>
+        <button class="tab" data-tab="usersTab">
+          <span class="tab-icon">👥</span> Users
+        </button>
+        <button class="tab" data-tab="productsTab">
+          <span class="tab-icon">🛒</span> Products
+        </button>
+      </nav>
+
+      <!-- 
+        Footer di sidebar:
+        - Menampilkan status API (online/offline) di sisi kiri.
+        - Tombol "themeToggle" dipakai JavaScript untuk ganti tema (dark ↔ light).
+      -->
+      <div class="sidebar-footer">
+        <!-- Label status API di sidebar, di-update oleh JS checkServerStatus() -->
+        <div id="sidebarApiStatus" class="api-status-pill">● Checking API…</div>
+
+        <!-- Tombol toggle tema (dark/light), labelnya diubah lewat JavaScript -->
+        <button id="themeToggle" class="btn btn-secondary btn-ghost">
+          🌙 Dark
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===================== MAIN AREA ===================== -->
+    <!-- 
+      Main area menampilkan seluruh isi dashboard:
+      - Header aplikasi
+      - Tab Auth, Users, Products
+      - Activity Log
+      - Footer
+    -->
+    <main class="main-area">
+      <!-- 
+        app-container adalah "kartu besar" utama:
+        - Background, border, dan padding diatur di CSS
+        - Menjadi container utama untuk semua card.
+      -->
+      <div class="app-container">
+
+        <!-- ========== HEADER APLIKASI ========== -->
+        <!-- 
+          Header:
+          - Logo kecil "S" (Shop)
+          - Nama aplikasi (Shop API Dashboard)
+          - Subtitle teknologi yang digunakan
+          - Status backend (serverStatus)
+        -->
+        <div class="app-header">
+          <div class="brand">
+            <!-- Logo lingkaran kecil sebagai branding aplikasi -->
+            <div class="brand-logo">S</div>
+            <div>
+              <div class="brand-text-main">Shop API Dashboard</div>
+              <div class="brand-text-sub">Flask · MySQL · REST · Auth & CRUD</div>
+            </div>
+          </div>
+          <!-- 
+            Status backend:
+            - Diupdate oleh JavaScript berdasarkan hasil request ke /test-db.
+            - Menunjukkan apakah API Flask online atau tidak.
+          -->
+          <div class="status-pill" id="serverStatus">● Checking server…</div>
+        </div>
+
+        <!-- ========== TAB: AUTH (REGISTER & LOGIN) ========== -->
+        <!-- 
+          Tab Auth:
+          - Menangani fitur register & login.
+          - Ditampilkan ketika tab "Auth" di sidebar aktif.
+          - Default-nya tab ini yang aktif di awal.
+        -->
+        <div class="content tab-content" id="authTab">
+          <!-- ===== Card Register ===== -->
+          <!-- 
+            Card untuk register:
+            - Form untuk membuat user baru.
+            - Mengirim request ke endpoint: POST /auth/register.
+          -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <!-- Judul card -->
+                <div class="card-title">Register User</div>
+                <!-- Penjelasan singkat bahwa data akan masuk ke tabel users -->
+                <div class="card-subtitle">Buat akun baru di tabel <code>users</code></div>
+              </div>
+              <!-- Badge endpoint yang dipakai, sebagai dokumentasi kecil -->
+              <span class="badge">POST /auth/register</span>
+            </div>
+
+            <!-- 
+              Form register:
+              - id="registerForm" dipakai JS untuk pasang event listener.
+              - Input email & password wajib diisi.
+            -->
+            <form id="registerForm">
+              <div class="form-group">
+                <label for="regEmail">Email</label>
+                <input type="email" id="regEmail" placeholder="user@mail.com" required />
+              </div>
+              <div class="form-group">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" placeholder="min. 6 karakter" required />
+              </div>
+              <div class="btn-row">
+                <!-- Tombol submit akan memicu event di JS dan mengirim request ke API -->
+                <button type="submit" class="btn btn-primary">
+                  <span class="btn-icon">➕</span> Register
+                </button>
+                <!-- Tombol clear hanya mereset form (ditangani oleh JS) -->
+                <button type="button" class="btn btn-secondary" id="regClearBtn">
+                  ✦ Clear
+                </button>
+              </div>
+            </form>
+            <!-- 
+              Area pesan respons register:
+              - Diisi oleh JavaScript (berhasil/gagal).
+            -->
+            <div class="message" id="registerMessage"></div>
+          </div>
+
+          <!-- ===== Card Login ===== -->
+          <!-- 
+            Card untuk login:
+            - Menguji endpoint login dan session backend.
+            - Menggunakan API POST /auth/login dan GET /auth/logout.
+          -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Login</div>
+                <div class="card-subtitle">Uji endpoint login dan session</div>
+              </div>
+              <!-- Menjelaskan endpoint yang terlibat untuk login & logout -->
+              <span class="badge">/auth/login · /auth/logout</span>
+            </div>
+
+            <!-- 
+              Form login:
+              - id="loginForm" digunakan untuk event submit di JS.
+              - Mengirim email & password ke backend.
+            -->
+            <form id="loginForm">
+              <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="user@mail.com" required />
+              </div>
+              <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="password" required />
+              </div>
+              <div class="btn-row">
+                <!-- Tombol login akan memicu POST /auth/login lewat JS -->
+                <button type="submit" class="btn btn-primary">
+                  <span class="btn-icon">✅</span> Login
+                </button>
+                <!-- Tombol logout memanggil endpoint /auth/logout lewat JS -->
+                <button type="button" class="btn btn-secondary" id="logoutBtn">
+                  <span class="btn-icon">🚪</span> Logout
+                </button>
+              </div>
+            </form>
+
+            <!-- Penjelasan bahwa session login belum digunakan untuk proteksi endpoint -->
+            <div class="hint-text">
+              Status login ini hanya simulasi (session di backend), belum dipakai untuk proteksi endpoint.
+            </div>
+
+            <!-- Area pesan login (berhasil/gagal), diisi oleh JS -->
+            <div class="message" id="loginMessage"></div>
+          </div>
+        </div>
+
+        <!-- ========== TAB: USERS (CRUD USERS) ========== -->
+        <!-- 
+          Tab Users:
+          - Berisi form dan tabel untuk melakukan operasi CRUD pada tabel users.
+          - Ditampilkan ketika tab "Users" di sidebar aktif.
+        -->
+        <div class="content tab-content" id="usersTab" style="display:none;">
+          <!-- ===== Card Form Users ===== -->
+          <!-- 
+            Card untuk mengelola user:
+            - Create user baru
+            - Update user (email, password, status)
+            - Delete user berdasarkan User ID
+          -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Manage Users</div>
+                <div class="card-subtitle">Create / Update / Delete user</div>
+              </div>
+              <!-- Endpoint utama untuk operasi CRUD user -->
+              <span class="badge">/users</span>
+            </div>
+
+            <!-- 
+              Form users:
+              - Menggunakan kombinasi tombol Create, Update, Delete.
+              - Masing-masing tombol punya event handler di JS (bukan submit form biasa).
+            -->
+            <form id="userForm">
+              <!-- 
+                User ID:
+                - Dikosongkan saat create (POST /users).
+                - Diisi saat update/delete (PUT/DELETE /users/:id).
+              -->
+              <div class="form-group">
+                <label for="userId">User ID (kosong untuk create)</label>
+                <input type="number" id="userId" placeholder="ID user untuk update / delete" />
+              </div>
+
+              <!-- Input email user -->
+              <div class="form-group">
+                <label for="userEmail">Email</label>
+                <input type="email" id="userEmail" placeholder="user@mail.com" />
+              </div>
+
+              <!-- Password opsional saat update (jika diisi, password akan diganti) -->
+              <div class="form-group">
+                <label for="userPassword">Password (opsional saat update)</label>
+                <input type="password" id="userPassword" placeholder="set / ganti password" />
+              </div>
+
+              <!-- Status user (Active / Inactive) -->
+              <div class="form-group">
+                <label for="userActive">Status</label>
+                <select id="userActive" class="select-input">
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </select>
+              </div>
+
+              <!-- Tombol aksi CRUD user, ditangani oleh JavaScript -->
+              <div class="btn-row">
+                <!-- Create → POST /users -->
+                <button type="button" class="btn btn-primary" id="createUserBtn">
+                  <span class="btn-icon">➕</span> Create
+                </button>
+                <!-- Update → PUT /users/:id -->
+                <button type="button" class="btn btn-secondary" id="updateUserBtn">
+                  <span class="btn-icon">✏️</span> Update
+                </button>
+                <!-- Delete → DELETE /users/:id -->
+                <button type="button" class="btn btn-danger" id="deleteUserBtn">
+                  <span class="btn-icon">🗑</span> Delete
+                </button>
+              </div>
+            </form>
+
+            <!-- Area pesan hasil operasi CRUD user -->
+            <div class="message" id="userFormMessage"></div>
+          </div>
+
+          <!-- ===== Card Tabel Users ===== -->
+          <!-- 
+            Card tabel users:
+            - Menampilkan hasil GET /users.
+            - Di-refresh lewat tombol "Refresh".
+          -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Users Table</div>
+                <div class="card-subtitle">Data dari endpoint <code>GET /users</code></div>
+              </div>
+              <!-- Tombol untuk memuat ulang data users dari backend -->
+              <button class="btn btn-secondary" id="refreshUsersBtn">
+                ⟳ Refresh
+              </button>
+            </div>
+
+            <!-- Wrapper tabel agar bisa discroll jika datanya banyak -->
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                  </tr>
+                </thead>
+                <!-- 
+                  Body tabel users:
+                  - Diisi secara dinamis oleh JavaScript (loadUsers()).
+                -->
+                <tbody id="usersTableBody">
+                  <!-- diisi JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Petunjuk penggunaan tabel users -->
+            <div class="hint-text">Klik refresh setelah create/update/delete untuk melihat perubahan.</div>
+          </div>
+        </div>
+
+        <!-- ========== TAB: PRODUCTS (CRUD PRODUCTS) ========== -->
+        <!-- 
+          Tab Products:
+          - Berisi form dan tabel untuk operasi CRUD pada tabel products.
+          - Ditampilkan ketika tab "Products" di sidebar aktif.
+        -->
+        <div class="content tab-content" id="productsTab" style="display:none;">
+          <!-- ===== Card Form Produk ===== -->
+          <!-- 
+            Card untuk mengelola produk:
+            - Create produk baru
+            - Update produk
+            - Delete produk
+          -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Manage Products</div>
+                <div class="card-subtitle">CRUD pada tabel <code>products</code></div>
+              </div>
+              <!-- Endpoint utama untuk produk -->
+              <span class="badge">/products</span>
+            </div>
+
+            <!-- 
+              Form produk:
+              - Sama seperti users, setiap tombol punya handler di JS.
+            -->
+            <form id="productForm">
+              <!-- ID produk digunakan untuk update/delete -->
+              <div class="form-group">
+                <label for="productId">Product ID (kosong untuk create)</label>
+                <input type="number" id="productId" placeholder="ID produk untuk update / delete" />
+              </div>
+              <!-- Nama produk -->
+              <div class="form-group">
+                <label for="productName">Name</label>
+                <input type="text" id="productName" placeholder="Nama produk" />
+              </div>
+              <!-- CategoryID harus sesuai dengan tabel product_categories -->
+              <div class="form-group">
+                <label for="productCategory">Category ID</label>
+                <input type="number" id="productCategory" placeholder="ID kategori (sesuai tabel product_categories)" />
+              </div>
+              <!-- Harga produk -->
+              <div class="form-group">
+                <label for="productPrice">Price</label>
+                <input type="number" id="productPrice" placeholder="Harga" />
+              </div>
+              <!-- Stok produk -->
+              <div class="form-group">
+                <label for="productStock">Stock</label>
+                <input type="number" id="productStock" placeholder="Jumlah stok" />
+              </div>
+
+              <!-- Tombol aksi CRUD produk, ditangani oleh JavaScript -->
+              <div class="btn-row">
+                <!-- Create → POST /products -->
+                <button type="button" class="btn btn-primary" id="createProductBtn">
+                  <span class="btn-icon">➕</span> Create
+                </button>
+                <!-- Update → PUT /products/:id -->
+                <button type="button" class="btn btn-secondary" id="updateProductBtn">
+                  <span class="btn-icon">✏️</span> Update
+                </button>
+                <!-- Delete → DELETE /products/:id -->
+                <button type="button" class="btn btn-danger" id="deleteProductBtn">
+                  <span class="btn-icon">🗑</span> Delete
+                </button>
+              </div>
+            </form>
+
+            <!-- Area pesan hasil operasi CRUD produk -->
+            <div class="message" id="productFormMessage"></div>
+          </div>
+
+          <!-- ===== Card Tabel Produk ===== -->
+          <!-- 
+            Card tabel produk:
+            - Menampilkan data dari GET /products.
+            - Ada tombol Refresh untuk memuat ulang data.
+          -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Products Table</div>
+                <div class="card-subtitle">Data dari endpoint <code>GET /products</code></div>
+              </div>
+              <!-- Tombol refresh produk -->
+              <button class="btn btn-secondary" id="refreshProductsBtn">
+                ⟳ Refresh
+              </button>
+            </div>
+
+            <!-- Tabel produk dengan scroll jika data banyak -->
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <!-- 
+                  Body tabel produk:
+                  - Diisi oleh JavaScript (loadProducts()).
+                -->
+                <tbody id="productsTableBody">
+                  <!-- diisi JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== ACTIVITY LOG ========== -->
+        <!-- 
+          Activity Log:
+          - Menampilkan riwayat request API terbaru (method, endpoint, status).
+          - Diupdate setiap kali apiFetch() dipanggil di JavaScript.
+          - Berguna untuk debugging dan monitoring aktivitas API.
+        -->
+        <div class="card activity-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Activity Log</div>
+              <div class="card-subtitle">Catatan request API terbaru</div>
+            </div>
+          </div>
+          <div class="activity-log-wrapper">
+            <!-- Daftar log aktivitas API (dimasukkan JS dengan <li>) -->
+            <ul id="activityLog"></ul>
+          </div>
+        </div>
+
+        <!-- ========== FOOTER ========== -->
+        <!-- 
+          Footer:
+          - Menampilkan informasi singkat tentang pembuat aplikasi.
+          - Cocok untuk portfolio dan penutup tampilan dashboard.
+        -->
+        <footer class="footer">
+          © 2025 · Built by M. Zainul Karohman · Shop API Mini Project
+        </footer>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ========== TOAST NOTIFICATION ========== -->
+  <!-- 
+    Elemen toast:
+    - Digunakan untuk menampilkan notifikasi kecil (success/error).
+    - Ditampilkan/di-hide oleh JavaScript (showToast()).
+  -->
+  <div id="toast" class="toast"></div>
+
+  <!-- 
+    File JavaScript utama:
+    - Meng-handle:
+      • Pergantian tab (Auth/Users/Products)
+      • Fetch API ke backend Flask
+      • Update status API & sidebar
+      • Activity log
+      • Toast notifikasi
+      • Dark/Light mode toggle
+      • CRUD Users & Products
+  -->
+  <script src="js/app.js" defer></script>
+</body>
+</html>
