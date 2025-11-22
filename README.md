@@ -1,4 +1,4 @@
-<img width="1919" height="1199" alt="Screenshot 2025-11-22 123258" src="https://github.com/user-attachments/assets/29855269-eef9-40fd-b8fc-59a9a76feacd" /># 🛍️ Shop API Dashboard — Mini Project Day 1
+🛍️ Shop APIDashboard — Mini Project Day 1
 📌 Fullstack Mini Project menggunakan **Flask + MySQL + REST API + Frontend Dashboard**
 
 Project ini dibuat sebagai latihan membangun API backend dan mengintegrasikannya dengan frontend sederhana.  
